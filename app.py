@@ -12,7 +12,7 @@ st.set_page_config(
 # Load data
 @st.cache_data
 def load_data():
-    df = pd.read_csv('cb.csv')
+    df = pd.read_csv('db.csv')
     return df
 
 # Main app
