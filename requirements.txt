@@ -1,23 +1,7 @@
 # Data manipulation and analysis
-pandas==2.1.4
-numpy==1.26.2
-
-# Data visualization
-matplotlib==3.8.2
-seaborn==0.13.0
-
-# Jupyter
-jupyter==1.0.0
-notebook==7.0.6
-ipykernel==6.27.1
-
-# Scientific computing
-scipy==1.11.4
+pandas>=2.2.0
+numpy>=1.26.0
 
 # Streamlit for web app
-streamlit==1.29.0
-
-# Optional but useful packages
-openpyxl==3.1.2  # For Excel file support
-xlrd==2.0.1      # For reading older Excel files
+streamlit>=1.29.0
 tabulate==0.9.0  # For pretty printing tables
