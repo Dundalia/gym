@@ -1,10 +1,11 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import re
 
 # Page configuration
 st.set_page_config(
-    page_title="Database Esercizi Palestra",
+    page_title="BlueGym",
     page_icon="💪",
     layout="wide"
 )
@@ -15,9 +16,47 @@ def load_data():
     df = pd.read_csv('db.csv')
     return df
 
+def parse_rating(value):
+    """Parse rating values like '3-4', '4 (Molto buono)', etc. to numeric"""
+    if pd.isna(value):
+        return None
+    
+    value_str = str(value).strip()
+    
+    # Extract first number from the string
+    match = re.search(r'(\d+)', value_str)
+    if match:
+        return int(match.group(1))
+    return None
+
+def is_in_range(value, min_val, max_val):
+    """Check if a rating value falls within the specified range"""
+    if pd.isna(value):
+        return True  # Include rows with missing values
+    
+    value_str = str(value).strip()
+    
+    # Handle range values like "3-4"
+    if '-' in value_str:
+        parts = value_str.split('-')
+        try:
+            low = int(parts[0])
+            high = int(parts[1])
+            # Check if the range overlaps with the filter range
+            return not (high < min_val or low > max_val)
+        except:
+            pass
+    
+    # Extract numeric value
+    parsed = parse_rating(value)
+    if parsed is None:
+        return True  # Include if we can't parse
+    
+    return min_val <= parsed <= max_val
+
 # Main app
 def main():
-    st.title("💪 Database Esercizi Palestra")
+    st.title("💪 BlueGym")
     st.markdown("Esplora e filtra migliaia di esercizi per la tua routine di allenamento")
     
     # Load data
@@ -91,42 +130,34 @@ def main():
         filtered_df = filtered_df[filtered_df['Attrezzo'] == selected_attrezzo]
     
     # Advanced filters - Training goals
-    # Convert to numeric for comparison, only filter if slider is changed from default
+    # Only filter if slider is changed from default
     if ipertrofia_range != (1, 5):
-        filtered_df['_ipertrofia_num'] = pd.to_numeric(filtered_df['Adatto Ipertrofia (1-5)'], errors='coerce')
         filtered_df = filtered_df[
-            (filtered_df['_ipertrofia_num'].notna()) &
-            (filtered_df['_ipertrofia_num'] >= ipertrofia_range[0]) &
-            (filtered_df['_ipertrofia_num'] <= ipertrofia_range[1])
+            filtered_df['Adatto Ipertrofia (1-5)'].apply(
+                lambda x: is_in_range(x, ipertrofia_range[0], ipertrofia_range[1])
+            )
         ]
-        filtered_df = filtered_df.drop(columns=['_ipertrofia_num'])
     
     if forza_range != (1, 5):
-        filtered_df['_forza_num'] = pd.to_numeric(filtered_df['Adatto Forza'], errors='coerce')
         filtered_df = filtered_df[
-            (filtered_df['_forza_num'].notna()) &
-            (filtered_df['_forza_num'] >= forza_range[0]) &
-            (filtered_df['_forza_num'] <= forza_range[1])
+            filtered_df['Adatto Forza'].apply(
+                lambda x: is_in_range(x, forza_range[0], forza_range[1])
+            )
         ]
-        filtered_df = filtered_df.drop(columns=['_forza_num'])
     
     if potenza_range != (1, 5):
-        filtered_df['_potenza_num'] = pd.to_numeric(filtered_df['Adatto Potenza (1-5)'], errors='coerce')
         filtered_df = filtered_df[
-            (filtered_df['_potenza_num'].notna()) &
-            (filtered_df['_potenza_num'] >= potenza_range[0]) &
-            (filtered_df['_potenza_num'] <= potenza_range[1])
+            filtered_df['Adatto Potenza (1-5)'].apply(
+                lambda x: is_in_range(x, potenza_range[0], potenza_range[1])
+            )
         ]
-        filtered_df = filtered_df.drop(columns=['_potenza_num'])
     
     if resistenza_range != (1, 5):
-        filtered_df['_resistenza_num'] = pd.to_numeric(filtered_df['Adatto Resistenza (1-5)'], errors='coerce')
         filtered_df = filtered_df[
-            (filtered_df['_resistenza_num'].notna()) &
-            (filtered_df['_resistenza_num'] >= resistenza_range[0]) &
-            (filtered_df['_resistenza_num'] <= resistenza_range[1])
+            filtered_df['Adatto Resistenza (1-5)'].apply(
+                lambda x: is_in_range(x, resistenza_range[0], resistenza_range[1])
+            )
         ]
-        filtered_df = filtered_df.drop(columns=['_resistenza_num'])
     
     if selected_difficolta != 'Tutti':
         filtered_df = filtered_df[filtered_df['Difficolta Apprendimento'].astype(str) == selected_difficolta]
@@ -205,10 +236,10 @@ def main():
             
             with col2:
                 st.markdown("### Metriche di Allenamento")
-                st.markdown(f"**Ipertrofia:** {exercise_data['Adatto Ipertrofia (1-5)']}/5")
-                st.markdown(f"**Forza:** {exercise_data['Adatto Forza']}/5")
-                st.markdown(f"**Potenza:** {exercise_data['Adatto Potenza (1-5)']}/5")
-                st.markdown(f"**Resistenza:** {exercise_data['Adatto Resistenza (1-5)']}/5")
+                st.markdown(f"**Ipertrofia:** {exercise_data['Adatto Ipertrofia (1-5)']}")
+                st.markdown(f"**Forza:** {exercise_data['Adatto Forza']}")
+                st.markdown(f"**Potenza:** {exercise_data['Adatto Potenza (1-5)']}")
+                st.markdown(f"**Resistenza:** {exercise_data['Adatto Resistenza (1-5)']}")
                 st.markdown(f"**Difficoltà:** {exercise_data['Difficolta Apprendimento']}")
                 st.markdown(f"**Spazio Richiesto:** {exercise_data['Spazio Necessario']}")
                 st.markdown(f"**Rischio Infortuni:** {exercise_data['Rischio Infortuni']}")
