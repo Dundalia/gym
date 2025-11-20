@@ -97,16 +97,30 @@ def main():
     filtered_df['Adatto Potenza (1-5)_num'] = pd.to_numeric(filtered_df['Adatto Potenza (1-5)'], errors='coerce')
     filtered_df['Adatto Resistenza (1-5)_num'] = pd.to_numeric(filtered_df['Adatto Resistenza (1-5)'], errors='coerce')
     
-    filtered_df = filtered_df[
-        (filtered_df['Adatto Ipertrofia (1-5)_num'] >= ipertrofia_range[0]) &
-        (filtered_df['Adatto Ipertrofia (1-5)_num'] <= ipertrofia_range[1]) &
-        (filtered_df['Adatto Forza_num'] >= forza_range[0]) &
-        (filtered_df['Adatto Forza_num'] <= forza_range[1]) &
-        (filtered_df['Adatto Potenza (1-5)_num'] >= potenza_range[0]) &
-        (filtered_df['Adatto Potenza (1-5)_num'] <= potenza_range[1]) &
-        (filtered_df['Adatto Resistenza (1-5)_num'] >= resistenza_range[0]) &
-        (filtered_df['Adatto Resistenza (1-5)_num'] <= resistenza_range[1])
-    ]
+    # Only apply filters if not at default range (1-5)
+    if ipertrofia_range != (1, 5):
+        filtered_df = filtered_df[
+            (filtered_df['Adatto Ipertrofia (1-5)_num'] >= ipertrofia_range[0]) &
+            (filtered_df['Adatto Ipertrofia (1-5)_num'] <= ipertrofia_range[1])
+        ]
+    
+    if forza_range != (1, 5):
+        filtered_df = filtered_df[
+            (filtered_df['Adatto Forza_num'] >= forza_range[0]) &
+            (filtered_df['Adatto Forza_num'] <= forza_range[1])
+        ]
+    
+    if potenza_range != (1, 5):
+        filtered_df = filtered_df[
+            (filtered_df['Adatto Potenza (1-5)_num'] >= potenza_range[0]) &
+            (filtered_df['Adatto Potenza (1-5)_num'] <= potenza_range[1])
+        ]
+    
+    if resistenza_range != (1, 5):
+        filtered_df = filtered_df[
+            (filtered_df['Adatto Resistenza (1-5)_num'] >= resistenza_range[0]) &
+            (filtered_df['Adatto Resistenza (1-5)_num'] <= resistenza_range[1])
+        ]
     
     if selected_difficolta != 'All':
         filtered_df = filtered_df[filtered_df['Difficolta Apprendimento'].astype(str) == selected_difficolta]
